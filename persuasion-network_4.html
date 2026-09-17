@@ -1,0 +1,904 @@
+<title>Persuasion Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f3efe4;
+    --paper-raised:#ece5d3;
+    --ink:#211d17;
+    --ink-soft:#4a4438;
+    --muted:#7a7264;
+    --line:#d9d0ba;
+    --accent:#8a2f24;
+    --font-serif:'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --cat-cognitive:#9a7b2f;
+    --cat-narrative:#2f6b5e;
+    --cat-algorithmic:#35618c;
+    --cat-infoops:#8a2f24;
+    --cat-resistance:#6b4a7a;
+    --edge-explicit:#4a4438;
+    --edge-thematic:#a89f8c;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#18160f;
+      --paper-raised:#211e15;
+      --ink:#eae3d2;
+      --ink-soft:#c9c0ac;
+      --muted:#948a76;
+      --line:#3a3527;
+      --accent:#e08a70;
+
+      --cat-cognitive:#d8b859;
+      --cat-narrative:#5fae9c;
+      --cat-algorithmic:#7aa8db;
+      --cat-infoops:#e08a70;
+      --cat-resistance:#b28ac4;
+      --edge-explicit:#c9c0ac;
+      --edge-thematic:#5a5646;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#18160f;
+    --paper-raised:#211e15;
+    --ink:#eae3d2;
+    --ink-soft:#c9c0ac;
+    --muted:#948a76;
+    --line:#3a3527;
+    --accent:#e08a70;
+
+    --cat-cognitive:#d8b859;
+    --cat-narrative:#5fae9c;
+    --cat-algorithmic:#7aa8db;
+    --cat-infoops:#e08a70;
+    --cat-resistance:#b28ac4;
+    --edge-explicit:#c9c0ac;
+    --edge-thematic:#5a5646;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-serif);
+    margin:0;
+    overflow:hidden;
+  }
+
+  .app{
+    display:flex;
+    flex-direction:column;
+    height:100%;
+    padding-top:env(safe-area-inset-top, 0px);
+  }
+
+  header{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+    padding:12px 16px;
+    border-bottom:2px solid var(--ink);
+    background:var(--paper);
+    z-index:10;
+  }
+  h1{
+    font-size:16px;
+    margin:0;
+    font-weight:700;
+    letter-spacing:-.01em;
+    white-space:nowrap;
+  }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:block;
+  }
+  .titlewrap{display:flex; flex-direction:column; gap:2px;}
+
+  #search{
+    flex:1 1 180px;
+    min-width:140px;
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    padding:8px 10px;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:6px;
+    color:var(--ink);
+  }
+  #search::placeholder{color:var(--muted);}
+
+  .legend{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    font-family:var(--font-mono);
+    font-size:10px;
+    color:var(--ink-soft);
+    align-items:center;
+  }
+  .legend .sw{
+    display:inline-flex; align-items:center; gap:5px;
+    padding:3px 8px 3px 6px;
+    border-radius:20px;
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    cursor:pointer;
+    user-select:none;
+    white-space:nowrap;
+  }
+  .legend .sw.off{opacity:.35;}
+  .legend .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+
+  .stage{
+    position:relative;
+    flex:1;
+    min-height:0;
+  }
+  svg#canvas{
+    display:block;
+    width:100%;
+    height:100%;
+    cursor:grab;
+  }
+  svg#canvas:active{cursor:grabbing;}
+
+  .node circle{
+    stroke:var(--paper);
+    stroke-width:2px;
+    cursor:pointer;
+  }
+  .node text{
+    font-family:var(--font-mono);
+    font-size:9.5px;
+    fill:var(--ink);
+    pointer-events:none;
+    paint-order:stroke;
+    stroke:var(--paper);
+    stroke-width:3px;
+    stroke-linejoin:round;
+  }
+  .node.dim{opacity:.14;}
+  .node.hidden{display:none;}
+  .link{
+    fill:none;
+    stroke:var(--edge-thematic);
+    stroke-width:1.1px;
+  }
+  .link.explicit{stroke:var(--edge-explicit); stroke-width:1.4px;}
+  .link.dim{opacity:.06;}
+  .link.hidden{display:none;}
+
+  .hint{
+    position:absolute;
+    left:16px;
+    bottom:14px;
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--muted);
+    background:var(--paper);
+    padding:4px 8px;
+    border-radius:5px;
+    border:1px solid var(--line);
+    pointer-events:none;
+  }
+
+  .zoombar{
+    position:absolute;
+    right:16px;
+    bottom:14px;
+    display:flex;
+    gap:6px;
+  }
+  .zoombar button{
+    font-family:var(--font-mono);
+    font-size:14px;
+    width:30px; height:30px;
+    border-radius:6px;
+    border:1px solid var(--line);
+    background:var(--paper-raised);
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .zoombar button:hover{border-color:var(--accent); color:var(--accent);}
+
+  /* side panel */
+  #panel{
+    position:absolute;
+    top:0; right:0;
+    height:100%;
+    width:min(360px, 88vw);
+    background:var(--paper-raised);
+    border-left:1px solid var(--line);
+    box-shadow:-8px 0 24px -12px rgba(0,0,0,.25);
+    transform:translateX(100%);
+    transition:transform .22s ease;
+    overflow-y:auto;
+    padding:18px 18px 40px;
+    z-index:20;
+  }
+  #panel.open{transform:translateX(0);}
+  #panel .close{
+    float:right;
+    font-family:var(--font-mono);
+    font-size:12px;
+    background:none;
+    border:1px solid var(--line);
+    border-radius:5px;
+    color:var(--muted);
+    padding:4px 9px;
+    cursor:pointer;
+  }
+  #panel .close:hover{color:var(--accent); border-color:var(--accent);}
+  #panel .cat-tag{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border-radius:20px;
+    display:inline-block;
+    margin-bottom:10px;
+    color:#fff;
+  }
+  #panel h2{
+    font-size:20px;
+    margin:0 0 4px;
+    clear:both;
+    letter-spacing:-.01em;
+  }
+  #panel .subtag{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--muted);
+    margin:0 0 14px;
+  }
+  #panel .def{font-size:14.5px; line-height:1.55; margin:0 0 12px;}
+  #panel .example{
+    font-size:13.5px;
+    background:color-mix(in srgb, var(--accent) 10%, transparent);
+    border-left:3px solid var(--accent);
+    padding:9px 12px;
+    border-radius:0 6px 6px 0;
+    margin:0 0 14px;
+  }
+  #panel .example b{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:block;
+    margin-bottom:4px;
+  }
+  #panel .refs{
+    font-size:12px;
+    color:var(--muted);
+    margin:0 0 16px;
+    padding-left:0;
+    list-style:none;
+  }
+  #panel .refs li{margin-bottom:5px; padding-left:1.1em; text-indent:-1.1em;}
+  #panel .refs li::before{content:"— "; color:var(--line);}
+  #panel .refs a{color:inherit; text-decoration:underline;}
+  #panel .related{margin-top:6px;}
+  #panel .related-title{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:0 0 8px;
+  }
+  #panel .related-list{display:flex; flex-wrap:wrap; gap:6px;}
+  #panel .related-chip{
+    font-family:var(--font-mono);
+    font-size:11px;
+    padding:4px 9px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  #panel .related-chip:hover{border-color:var(--accent); color:var(--accent);}
+  #panel .fullentry{
+    display:inline-block;
+    margin-top:6px;
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--accent);
+  }
+
+  @media (max-width:560px){
+    header{gap:8px;}
+    .legend{gap:6px;}
+    .legend .sw{padding:3px 6px 3px 5px; font-size:9px;}
+    h1{font-size:14px;}
+  }
+
+  [hidden]{display:none !important;}
+</style>
+
+<div class="app">
+  <header>
+    <div class="titlewrap">
+      <span class="eyebrow">Companion / Persuasion Dossier</span>
+      <h1>Persuasion Network</h1>
+    </div>
+    <input id="search" type="text" placeholder="Find a term…" autocomplete="off">
+    <div class="legend" id="legend"></div>
+  </header>
+
+  <div class="stage">
+    <svg id="canvas"></svg>
+    <div class="hint">Drag to pan · scroll to zoom · click a node for its entry</div>
+    <div class="zoombar">
+      <button id="zoomIn" aria-label="Zoom in">+</button>
+      <button id="zoomOut" aria-label="Zoom out">–</button>
+      <button id="zoomReset" aria-label="Reset view">⟲</button>
+    </div>
+    <aside id="panel">
+      <button class="close" id="panelClose">close ✕</button>
+      <span class="cat-tag" id="panelCat"></span>
+      <h2 id="panelTerm"></h2>
+      <p class="subtag" id="panelSub"></p>
+      <p class="def" id="panelDef"></p>
+      <div class="example" id="panelExample"><b>Example</b><span id="panelExampleText"></span></div>
+      <ul class="refs" id="panelRefs"></ul>
+      <div class="related">
+        <p class="related-title">Connected terms</p>
+        <div class="related-list" id="panelRelated"></div>
+      </div>
+      <a class="fullentry" id="panelFull" href="#" target="_blank" rel="noopener">Full entry in Persuasion Dossier ↗</a>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function(){
+
+function loadD3(cb){
+  if (window.d3) { cb(); return; }
+  var sources = [
+    "https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js",
+    "https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"
+  ];
+  var i = 0;
+  function tryNext(){
+    if (window.d3) { cb(); return; }
+    if (i >= sources.length) { cb(new Error("The chart library (d3) could not be loaded from any source.")); return; }
+    var s = document.createElement("script");
+    s.src = sources[i++];
+    s.onload = function(){ window.d3 ? cb() : tryNext(); };
+    s.onerror = tryNext;
+    document.head.appendChild(s);
+  }
+  tryNext();
+}
+
+function showLoadError(){
+  var app = document.querySelector(".app");
+  if(!app) return;
+  app.innerHTML =
+    '<div style="max-width:440px;margin:15vh auto 0;padding:0 20px;text-align:center;font-family:var(--font-serif);color:var(--ink);">' +
+      '<p style="font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 10px;">Could not load</p>' +
+      '<h2 style="margin:0 0 10px;font-size:20px;">This page needs an internet connection</h2>' +
+      '<p style="color:var(--ink-soft);font-size:14px;line-height:1.55;margin:0 0 18px;">The chart library did not load. This can happen if a school or office network, firewall, or ad blocker is blocking cdnjs.cloudflare.com or cdn.jsdelivr.net. Check your connection and try again, or open this page on a different network.</p>' +
+      '<button onclick="location.reload()" style="font-family:var(--font-mono);font-size:12.5px;padding:9px 18px;border-radius:6px;border:1px solid var(--line);background:var(--paper-raised);color:var(--ink);cursor:pointer;">Reload page</button>' +
+    '</div>';
+}
+
+loadD3(function(err){
+  if (err) { console.error(err); showLoadError(); return; }
+  try{
+    initGraph();
+  }catch(e){
+    console.error(e);
+    document.body.innerHTML = "<p style='padding:24px;font-family:monospace'>Something didn't load correctly: " + (e && e.message ? e.message : e) + "</p>";
+  }
+});
+
+function initGraph(){
+
+var CATS = {
+  cognitive:   {label:"I · Cognitive & Psychological",  color:"var(--cat-cognitive)"},
+  narrative:   {label:"II · Narrative & Communication",  color:"var(--cat-narrative)"},
+  algorithmic: {label:"III · Algorithmic & Platform",     color:"var(--cat-algorithmic)"},
+  infoops:     {label:"IV · Influence Operations",        color:"var(--cat-infoops)"},
+  resistance:  {label:"V · Resistance & Countermeasures", color:"var(--cat-resistance)"}
+};
+
+var GLOSSARY_URL = "https://claude.ai/artifact/MNt4Ze1i1CgdCt8J9PY3qX";
+
+var NODES = [
+  {id:"illusory-truth-effect", term:"Illusory Truth Effect", cat:"cognitive", tag:"cognitive bias",
+    def:"Rating a statement as more true after repeated exposure, independent of accuracy — repetition raises processing fluency, which is misread as a truth cue.",
+    ex:"A claim heard in a debate, then a headline, then a meme, feels more credible on the fourth encounter, even after each instance was fact-checked.",
+    refs:[["Hasher, Goldstein & Toppino (1977), \"Frequency and the Conference of Referential Validity\"","https://en.wikipedia.org/wiki/Illusory_truth_effect"],["Fazio et al. (2015), \"Knowledge Does Not Protect Against Illusory Truth\"","https://www.apa.org/pubs/journals/features/xge-0000098.pdf"]]},
+  {id:"social-judgment-theory", term:"Social Judgment Theory", cat:"cognitive", tag:"persuasion theory",
+    def:"People evaluate messages against their own anchor position, sorting claims into latitudes of acceptance, rejection, or noncommitment — nearby messages assimilate, distant ones contrast.",
+    ex:"A moderate viewer perceives a mildly left-leaning segment as neutral, but a further-left segment as radical, even when the actual gap is small.",
+    refs:[["Sherif & Hovland (1961), Social Judgment: Assimilation and Contrast Effects","https://communication.iresearchnet.com/media/social-judgment-theory/"]]},
+  {id:"negativity-bias", term:"Negativity Bias", cat:"cognitive", tag:"cognitive bias",
+    def:"Negative information has a greater psychological impact than positive information of equal intensity.",
+    ex:"A single scandal story spreads further and is remembered longer than several positive announcements the same week.",
+    refs:[["Rozin & Royzman (2001), \"Negativity Bias, Negativity Dominance, and Contagion\"","https://www.sciencedirect.com/science/article/pii/S0023969021000254"]]},
+  {id:"cognitive-dissonance", term:"Cognitive Dissonance", cat:"cognitive", tag:"psychological theory",
+    def:"The discomfort of holding contradictory beliefs, or acting against one's beliefs, which motivates reducing the inconsistency.",
+    ex:"Propaganda offering a face-saving justification lets audiences keep a prior belief without confronting contradicting facts.",
+    refs:[["Festinger, L. (1957), A Theory of Cognitive Dissonance","https://www.panarchy.org/festinger/dissonance.html"]]},
+  {id:"exploiting-cognitive-biases", term:"Exploiting Cognitive Biases", cat:"cognitive", tag:"applied / umbrella",
+    def:"Designing a message to trigger a known error in judgment (availability heuristic, anchoring) rather than persuading through evaluable information.",
+    ex:"Leading with one vivid anecdote about a rare crime to make it feel statistically common.",
+    refs:[["Franke & van Rooij, \"Strategies of Persuasion, Manipulation and Propaganda\"","https://michael-franke.github.io/heimseite/Papers/Franke-vanRooij_Opinion-Dynamics.pdf"]]},
+  {id:"cognitive-manipulation", term:"Cognitive Manipulation", cat:"cognitive", tag:"applied / umbrella",
+    def:"Umbrella term for shaping belief by exploiting predictable weaknesses in reasoning rather than evidence the target can freely weigh.",
+    ex:"A push poll plants an unverified claim as fact before any answer is given.",
+    refs:[["\"Engineering Belief\" — Media Psychology Review","https://mprcenter.org/review/engineering-belief/"]]},
+  {id:"emotional-exhaustion", term:"Emotional Exhaustion", cat:"cognitive", tag:"psychological state",
+    def:"Depletion of emotional resources from sustained high-volume affective content, pushing audiences toward numb disengagement or reduced scrutiny.",
+    ex:"After hours of doomscrolling, a reader shares the next alarming headline reflexively, too fatigued to check it.",
+    refs:[["\"Antecedents of Social Media Fatigue...\", Computers in Human Behavior (2022)","https://www.sciencedirect.com/science/article/abs/pii/S074756322200320X"]]},
+  {id:"confirmation-bias", term:"Confirmation Bias", cat:"cognitive", tag:"cognitive bias",
+    def:"Searching for, interpreting, and recalling information in ways that confirm preexisting beliefs, while discounting contradictory evidence.",
+    ex:"Sharing an article confirming one's view without checking sourcing, while scrolling past complicating articles.",
+    refs:[["Nickerson, R.S. (1998), \"Confirmation Bias: A Ubiquitous Phenomenon\"","https://pages.ucsd.edu/~mckenzie/nickersonConfirmationBias.pdf"]]},
+  {id:"selective-exposure", term:"Selective Exposure Theory", cat:"cognitive", tag:"cognitive / social theory",
+    def:"The tendency to seek attitude-consistent sources and avoid attitude-discrepant ones — the behavioral precursor to echo chambers.",
+    ex:"A partisan viewer defaults to the one channel that consistently validates their politics.",
+    refs:[["Selective exposure theory — overview","https://en.wikipedia.org/wiki/Selective_exposure_theory"]]},
+  {id:"continued-influence-effect", term:"Continued Influence Effect (Backfire Effect)", cat:"cognitive", tag:"cognitive bias",
+    def:"Misinformation keeps shaping belief even after a credible correction is accepted; a backfire effect is the stronger, contested claim that correction can entrench the false belief.",
+    ex:"People keep citing details from a retracted false story weeks after the retraction.",
+    refs:[["\"Continued Influence Effect\" — The Behavioral Scientist","https://www.thebehavioralscientist.com/glossary/continued-influence-effect"]]},
+  {id:"moral-contagion", term:"Moral Contagion (MAD Model)", cat:"cognitive", tag:"cognitive / platform theory",
+    def:"Moral-emotional content spreads faster via Motivation (identity-signaling), Attention (it's inherently attention-grabbing), and Design (platforms reward charged sharing).",
+    ex:"A morally condemning post about an out-group outperforms a similar neutral post.",
+    refs:[["Brady, Crockett & Van Bavel (2020), \"The MAD Model of Moral Contagion\"","https://journals.sagepub.com/doi/10.1177/1745691620917336"]]},
+
+  {id:"narrative-persuasion", term:"Narrative Persuasion", cat:"narrative", tag:"persuasion theory",
+    def:"Attitude change from stories rather than argument, via \"transportation\" — absorption in a narrative world that suppresses counter-arguing.",
+    ex:"A dramatized documentary about one wrongfully convicted person shifts opinion more than a page of statistics.",
+    refs:[["Green & Brock (2000), \"The Role of Transportation in the Persuasiveness of Public Narratives\"","https://www.researchgate.net/publication/12248972_The_Role_of_Transportation_in_the_Persuasiveness_of_Public_Narratives"]]},
+  {id:"monologic-dialogic", term:"Monologic vs. Dialogic Mass Communication", cat:"narrative", tag:"communication theory",
+    def:"Bakhtinian distinction between one-directional communication with no feedback loop (monologic) and multi-directional communication allowing contestation (dialogic).",
+    ex:"A nightly news broadcast is monologic; a live call-in debate is dialogic.",
+    refs:[["Bakhtin, M. (1981), The Dialogic Imagination","https://en.wikipedia.org/wiki/Dialogic"]]},
+  {id:"monologue-persuasion", term:"Monologue Persuasion", cat:"narrative", tag:"applied / umbrella",
+    def:"Persuasion through one-way, uncontested messaging where the audience cannot immediately rebut the claim.",
+    ex:"A political attack ad makes its claim in a fixed slot with no built-in right of reply.",
+    refs:[["Hovland, Lumsdaine & Sheffield (1949), Experiments on Mass Communication","https://en.wikipedia.org/wiki/Dialogic"]]},
+  {id:"emotional-narrative-manipulation", term:"Emotional and Narrative Manipulation", cat:"narrative", tag:"applied / umbrella",
+    def:"Combines fear/outrage triggers with narrative framing (heroes/villains/victims) so a claim feels urgent because of its story shape, not its evidence.",
+    ex:"Framing an out-group as an existential threat to \"our children.\"",
+    refs:[["Brady, Wills, Jost, Tucker & Van Bavel (2017), PNAS","https://www.pnas.org/doi/10.1073/pnas.1618923114"]]},
+  {id:"historical-manipulation", term:"Historical Manipulation", cat:"narrative", tag:"applied / umbrella",
+    def:"Deliberate distortion, omission, or fabrication of historical narratives to serve present-day political goals.",
+    ex:"State media emphasizing a historical grievance to justify a current territorial claim.",
+    refs:[["\"Information Manipulation and Historical Revisionism\", Open Research Europe (2024)","https://open-research-europe.ec.europa.eu/articles/3-121"]]},
+  {id:"presuasion", term:"Presuasion", cat:"narrative", tag:"persuasion theory",
+    def:"Cialdini's term for directing attention and associations immediately before a persuasive message, priming favorable reception before the pitch arrives.",
+    ex:"An ad opens on a starry sky, priming trust, seconds before a low-cost product claim.",
+    refs:[["Cialdini, R.B. (2016), Pre-Suasion","https://www.mindtools.com/ac5miqv/pre-suasion/"]]},
+
+  {id:"algorithmic-radicalization", term:"Algorithmic Radicalization", cat:"algorithmic", tag:"platform mechanism",
+    def:"Recommendation algorithms progressively steer users toward more extreme content by optimizing for engagement, producing \"rabbit holes.\"",
+    ex:"A YouTube viewer of mainstream commentary is gradually recommended more fringe channels.",
+    refs:[["Ribeiro et al. (2020), \"Auditing Radicalization Pathways on YouTube\"","https://arxiv.org/pdf/1912.11211"]]},
+  {id:"algorithmic-micro-persuasion", term:"Algorithmic Micro-Persuasion", cat:"algorithmic", tag:"applied / umbrella",
+    def:"Algorithmically optimized, individually tailored small-scale persuasive nudges delivered at scale to shift attitudes incrementally.",
+    ex:"An ad platform tests hundreds of micro-variations of a political ad, keeping only the highest-converting version per group.",
+    refs:[["Zarouali et al. (2022), Communication Research","https://journals.sagepub.com/doi/full/10.1177/0093650220961965"]]},
+  {id:"algorithmic-negativity-bias", term:"Algorithmic Negativity Bias", cat:"algorithmic", tag:"applied / umbrella",
+    def:"Engagement-optimized ranking systems systematically surface negative or morally-charged content because it generates disproportionate engagement.",
+    ex:"Moral-emotional \"outrage\" language spreads further per share than neutral posts.",
+    refs:[["Rathje, Van Bavel & van der Linden (2021), PNAS","https://www.pnas.org/doi/10.1073/pnas.2024292118"]]},
+  {id:"ai-driven-amplification", term:"AI-Driven Amplification", cat:"algorithmic", tag:"platform mechanism",
+    def:"Using AI systems to increase reach or apparent popularity of content beyond what organic sharing would produce.",
+    ex:"AI-generated accounts mass-produce wording variations of the same claim so it appears organically trending.",
+    refs:[["The Conversation (2025), \"Swarms of AI Bots Can Sway People's Beliefs\"","https://theconversation.com/swarms-of-ai-bots-can-sway-peoples-beliefs-threatening-democracy-274778"]]},
+  {id:"microtargeting", term:"Microtargeting", cat:"algorithmic", tag:"campaign technique",
+    def:"Using granular voter/consumer data to identify narrow audience segments and deliver customized messages.",
+    ex:"Different ads to suburban parents worried about school safety versus young voters worried about climate.",
+    refs:[["\"Microtargeting, Voters' Unawareness, and Democracy\", J. of Law, Econ. & Org. (2025)","https://academic.oup.com/jleo/article/41/2/634/7610769"]]},
+  {id:"psychographic-targeting", term:"Psychographic Targeting", cat:"algorithmic", tag:"campaign technique",
+    def:"Segmenting audiences by psychological traits (often the OCEAN/Big Five model) rather than demographics alone.",
+    ex:"Cambridge Analytica's claimed OCEAN-trait scoring from Facebook likes, targeting fear-based messaging at high-neuroticism voters.",
+    refs:[["Frontiers in Communication (2020)","https://www.frontiersin.org/journals/communication/articles/10.3389/fcomm.2020.00067/full"]]},
+  {id:"variable-ratio-reinforcement", term:"Variable-Ratio Reinforcement", cat:"algorithmic", tag:"behavioral mechanism",
+    def:"An operant-conditioning schedule where reward follows an unpredictable number of responses — the highest, most persistent response rate of any schedule.",
+    ex:"Refreshing a feed sometimes surfaces a viral post and sometimes nothing, like a slot machine's payout.",
+    refs:[["Skinner, B.F. (1938), The Behavior of Organisms","https://en.wikipedia.org/wiki/Reinforcement"]]},
+  {id:"operant-conditioning-variable-rewards", term:"Operant Conditioning Through Variable Rewards", cat:"algorithmic", tag:"applied / product design",
+    def:"The applied, product-design instantiation of variable-ratio reinforcement: unpredictable rewards engineered into an app to condition compulsive checking.",
+    ex:"Push notifications and infinite-scroll feeds timed so a \"rewarding\" moment arrives unpredictably.",
+    refs:[["Eyal, N. (2014), Hooked","https://en.wikipedia.org/wiki/Hooked:_How_to_Build_Habit-Forming_Products"]]},
+  {id:"filter-bubble", term:"Filter Bubble", cat:"algorithmic", tag:"platform mechanism",
+    def:"Intellectual isolation from algorithmic curation based on past clicks/data, narrowing what a user sees without their choosing it.",
+    ex:"Two people searching the same term see different results shaped by their own click histories.",
+    refs:[["Pariser, E. (2011), The Filter Bubble","https://en.wikipedia.org/wiki/Filter_bubble"]]},
+  {id:"deepfakes-synthetic-media", term:"Deepfakes / Synthetic Media", cat:"algorithmic", tag:"platform mechanism",
+    def:"AI-generated or manipulated audio/video/images depicting a real person saying or doing something they never did.",
+    ex:"A fabricated video shows a leader making an inflammatory statement days before an election; clips keep circulating after debunking.",
+    refs:[["Vaccari & Chadwick (2020), Social Media + Society","https://journals.sagepub.com/doi/10.1177/2056305120903408"]]},
+
+  {id:"narrative-kill-chain", term:"Narrative Kill Chain", cat:"infoops", tag:"applied / info-ops",
+    def:"A model of disinformation as sequential stages (creation, seeding, amplification, normalization), borrowed from the cyber \"kill chain\" concept.",
+    ex:"An actor crafts a false narrative, seeds it on fringe forums, amplifies it via troll accounts, and it's picked up by mainstream press.",
+    refs:[["Schneier & Lin (2019), \"Toward an Information Operations Kill Chain\"","https://www.lawfaremedia.org/article/toward-information-operations-kill-chain"]]},
+  {id:"human-terrain", term:"Human Terrain", cat:"infoops", tag:"info-ops term",
+    def:"Originally a U.S. military program mapping a population's social/cultural landscape; broadened to mean mapping beliefs and grievances to design tailored campaigns.",
+    ex:"An information operation profiles a region's ethnic fault lines before deploying tailored narratives.",
+    refs:[["American Anthropological Association, \"Human Terrain System (HTS) Project\"","https://americananthro.org/about/committees-and-task-forces/human-terrain-system-hts-project/"]]},
+  {id:"bots-troll-farms", term:"Bots, Troll Farms", cat:"infoops", tag:"info-ops actors",
+    def:"Bots are automated accounts amplifying content without human authorship; troll farms are organized paid-operator networks running fake-account networks.",
+    ex:"Russia's Internet Research Agency ran fake U.S.-persona accounts alongside bot networks around the 2016 election.",
+    refs:[["Woolley & Howard (2018), Computational Propaganda","https://global.oup.com/academic/product/computational-propaganda-9780190931414"]]},
+  {id:"echo-chambers", term:"Echo Chambers", cat:"infoops", tag:"social mechanism",
+    def:"Environments where a person is mainly exposed to belief-reinforcing information via selective exposure and homophily.",
+    ex:"A user following only like-minded accounts sees a near-uniform feed and mistakes it for consensus.",
+    refs:[["Sunstein, C.R. (2001), Republic.com","https://www.darden.virginia.edu/sites/default/files/inline-files/05_16371_RA_KitchensJohnsonGray%20Final_0.pdf"]]},
+  {id:"synthetic-consensus", term:"Synthetic Consensus", cat:"infoops", tag:"applied / info-ops",
+    def:"Artificial appearance of widespread agreement manufactured through bots or coordinated inauthentic behavior, exploiting the social-proof heuristic.",
+    ex:"A hashtag is made to \"trend\" using thousands of bot accounts.",
+    refs:[["The Conversation (2025), \"Swarms of AI Bots...\"","https://theconversation.com/swarms-of-ai-bots-can-sway-peoples-beliefs-threatening-democracy-274778"]]},
+  {id:"attribution-ambiguity", term:"Attribution Ambiguity", cat:"infoops", tag:"info-ops concept",
+    def:"Difficulty identifying who is responsible for an influence operation, sometimes deliberately exploited for plausible deniability.",
+    ex:"A campaign is routed through third-country servers and personas so it can't be pinned on its sponsor.",
+    refs:[["NATO StratCom COE & Hybrid CoE (2023), \"Attributing Information Influence Operations\"","https://stratcomcoe.org/publications/download/Nato-Attributing-Information-Influence-Operations-DIGITAL-v4.pdf"]]},
+  {id:"information-chaos", term:"Information Chaos", cat:"infoops", tag:"applied / info-ops",
+    def:"Volume, contradiction, and velocity of competing claims overwhelming an audience's ability to tell reliable from unreliable information.",
+    ex:"During a crisis, dozens of contradictory claims circulate simultaneously.",
+    refs:[["Wardle & Derakhshan (2017), \"Information Disorder\"","https://firstdraftnews.org/long-form-article/understanding-information-disorder/"]]},
+  {id:"cognitive-warfare", term:"Cognitive Warfare", cat:"infoops", tag:"info-ops doctrine",
+    def:"A NATO concept treating the human mind as a domain of conflict: sustained use of information, cyber, psychological, and social tools to shape perceptions and decisions.",
+    ex:"A campaign combines leaked documents, tailored social narratives, and economic pressure to erode trust in a government's competence.",
+    refs:[["NATO ACT, \"Cognitive Warfare: Beyond Military Information Support Operations\"","https://www.act.nato.int/article/cognitive-warfare-beyond-military-information-support-operations/"]]},
+  {id:"astroturfing", term:"Astroturfing", cat:"infoops", tag:"info-ops tactic",
+    def:"Manufacturing the appearance of spontaneous grassroots support that is actually centrally organized and often paid for.",
+    ex:"A PR firm creates local-sounding accounts pushing identical talking points to simulate neighborhood opposition.",
+    refs:[["\"Astroturf\" — SourceWatch","https://www.sourcewatch.org/index.php/Astroturf"]]},
+  {id:"information-disorder", term:"Information Disorder", cat:"infoops", tag:"info-ops framework",
+    def:"Framework distinguishing misinformation (false, no intent to harm), disinformation (false, intended to harm), and malinformation (true but shared out of context to harm).",
+    ex:"A leaked private email, true but timed for maximum election-season damage, is malinformation.",
+    refs:[["Wardle & Derakhshan (2017), Council of Europe / First Draft","https://firstdraftnews.org/long-form-article/understanding-information-disorder/"]]},
+  {id:"firehose-of-falsehood", term:"Firehose of Falsehood", cat:"infoops", tag:"applied / info-ops model",
+    def:"A propaganda model of high-volume, rapid, continuous, often self-contradictory messaging that persuades through volume rather than consistency.",
+    ex:"Multiple contradictory official explanations for the same incident are floated simultaneously, overwhelming fact-checkers.",
+    refs:[["Paul & Matthews (2016), RAND Corporation","https://www.rand.org/content/dam/rand/pubs/perspectives/PE100/PE198/RAND_PE198.pdf"]]},
+  {id:"coordinated-inauthentic-behavior", term:"Coordinated Inauthentic Behavior", cat:"infoops", tag:"info-ops tactic",
+    def:"Meta's term for networks of accounts/pages that work together to mislead about who is behind them, regardless of content truthfulness.",
+    ex:"Fabricated-persona accounts coordinate posting schedules to simulate grassroots support for a fringe narrative.",
+    refs:[["Meta Newsroom (2018), \"Coordinated Inauthentic Behavior Explained\"","https://about.fb.com/news/2018/12/inside-feed-coordinated-inauthentic-behavior/"]]},
+  {id:"fimi", term:"Foreign Information Manipulation and Interference (FIMI)", cat:"infoops", tag:"info-ops policy term",
+    def:"The EU's term for mostly non-illegal, manipulative, coordinated foreign-actor behavior threatening democratic processes.",
+    ex:"A foreign government funds ostensibly independent local news sites that amplify its foreign-policy narratives.",
+    refs:[["EUvsDisinfo, \"FIMI Explained\"","https://euvsdisinfo.eu/foreign-information-manipulation-and-interference-fimi-explained/"]]},
+  {id:"reflexive-control", term:"Reflexive Control", cat:"infoops", tag:"info-ops doctrine",
+    def:"A Russian military-theoretical concept: transmitting prepared information to an adversary to incline them to voluntarily make a decision predetermined by the initiator.",
+    ex:"Staging a visible, low-cost exercise near a border to provoke a costly over-extended defensive reaction.",
+    refs:[["Reflexive control — overview","https://en.wikipedia.org/wiki/Reflexive_control"]]},
+  {id:"whataboutism", term:"Whataboutism", cat:"infoops", tag:"rhetorical technique",
+    def:"Rhetorical deflection answering criticism by pointing to an alleged wrongdoing of the accuser or a third party.",
+    ex:"A government accused of a rights violation lists unrelated issues in the accusing countries instead of addressing the accusation.",
+    refs:[["\"Whataboutism\" — Encyclopaedia Britannica","https://www.britannica.com/topic/whataboutism"]]},
+  {id:"gish-gallop", term:"Gish Gallop", cat:"infoops", tag:"rhetorical technique",
+    def:"Firing off an overwhelming barrage of claims (many weak or irrelevant) so an opponent cannot rebut them all in the time available.",
+    ex:"A dozen claims packed into ninety seconds of debate; unaddressed points read to the audience as unrefuted.",
+    refs:[["Gish gallop — overview","https://en.wikipedia.org/wiki/Gish_gallop"]]},
+  {id:"manufacturing-consent", term:"Manufacturing Consent (Propaganda Model)", cat:"infoops", tag:"structural theory",
+    def:"Herman & Chomsky's account of how mass media produce elite/corporate-favorable content via five structural filters: ownership, advertising, sourcing, flak, and a unifying fear ideology.",
+    ex:"Coverage critical of a major advertiser's industry quietly gets less follow-up across outlets dependent on that ad spending.",
+    refs:[["Herman & Chomsky (1988), Manufacturing Consent","https://chomsky.info/consent01/"]]},
+  {id:"flak", term:"Flak", cat:"infoops", tag:"structural theory",
+    def:"One of the propaganda model's five filters: organized pushback (complaints, lawsuits, advertiser boycotts) that raises the cost of unwelcome reporting.",
+    ex:"A coordinated wave of complaints and boycott threats follows an investigative report, making editors more cautious afterward.",
+    refs:[["Humanities LibreTexts, \"The Five Filters of the Propaganda Model\"","https://human.libretexts.org/Workbench/Communication_and_Critical/Cultural_Studies/04:_The_Propaganda_Model/4.01:_The_Five_Filters_of_the_Propaganda_Model"]]},
+  {id:"brainwashing", term:"Brainwashing (Thought Reform)", cat:"infoops", tag:"contested / historical",
+    def:"A Cold War–era term for coercively dismantling and replacing a person's beliefs against their will. Courts and mainstream psychology later rejected it as a well-defined, deterministic mechanism; scholars now prefer terms like coercive persuasion or coercive control.",
+    ex:"A former group member's account of being \"brainwashed\" is now more likely analyzed as specific coercive-control tactics — isolation, information control, fear-based compliance.",
+    refs:[["Lifton, R.J. (1961), Thought Reform and the Psychology of Totalism","https://www.britannica.com/topic/brainwashing"],["\"Brainwashing Has a Grim History We Shouldn't Dismiss\" — Psyche/Aeon","https://psyche.co/ideas/brainwashing-has-a-grim-history-that-we-shouldnt-dismiss"]]},
+
+  {id:"inoculation-theory", term:"Inoculation Theory", cat:"resistance", tag:"resistance theory",
+    def:"Exposing someone to a weakened, refutable version of a manipulative argument builds resistance to the stronger version later, by analogy to vaccination.",
+    ex:"A media-literacy course walks through a crude fear-ad example so the technique is recognized later.",
+    refs:[["McGuire, W.J. (1961); overview at Communication Theory","https://www.communicationtheory.org/inoculation-theory/"]]},
+  {id:"prebunking", term:"Prebunking", cat:"resistance", tag:"applied / intervention",
+    def:"The applied, media-scale version of inoculation theory: exposing audiences in advance to manipulation techniques themselves so they can spot them wherever they appear.",
+    ex:"A game has players run a fake news outlet using scare tactics; players show reduced susceptibility afterward.",
+    refs:[["Roozenbeek et al. (2021), \"Towards Psychological Herd Immunity\"","https://journals.sagepub.com/doi/10.1177/20539517211013868"]]},
+  {id:"psychological-reactance", term:"Psychological Reactance", cat:"resistance", tag:"resistance theory",
+    def:"A motivational state triggered when a persuasive attempt is perceived as a threat to freedom of choice, producing resistance or a \"boomerang effect.\"",
+    ex:"A bluntly commanding public-health ad can produce more hesitancy among skeptics than no ad at all.",
+    refs:[["Brehm, J.W. (1966), A Theory of Psychological Reactance","https://en.wikipedia.org/wiki/Boomerang_effect_(psychology)"]]},
+  {id:"lateral-reading", term:"Lateral Reading", cat:"resistance", tag:"applied / literacy skill",
+    def:"Leaving an unfamiliar page to check other independent sources about it, rather than evaluating credibility by reading up and down the page itself.",
+    ex:"Opening a new tab to search an unfamiliar outlet's name and finding it's a known partisan front, in under a minute.",
+    refs:[["Wineburg & McGrew, \"Lateral Reading\"","https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3048994"]]},
+  {id:"debunking-handbook", term:"Evidence-Based Debunking", cat:"resistance", tag:"applied / intervention",
+    def:"Research-backed correction practices: lead with the accurate fact, briefly flag the myth as false, fill the gap with an alternative explanation, keep it simple.",
+    ex:"A correction leads with \"Z is the actual cause\" rather than repeating the false claim as its own headline.",
+    refs:[["Lewandowsky, Cook et al. (2020), The Debunking Handbook 2020","https://digitalcommons.unl.edu/context/scholcom/article/1247/viewcontent/DebunkingHandbook2020.pdf"]]},
+  {id:"algorithmic-friction", term:"Algorithmic Friction / Nudges", cat:"resistance", tag:"applied / platform design",
+    def:"Deliberate speed bumps in a platform interface that interrupt reflexive sharing, giving reflective judgment a chance to engage.",
+    ex:"Twitter's \"read before you retweet\" prompt measurably increased the share of articles opened before being reshared.",
+    refs:[["TechCrunch (2020), \"Read Before You Retweet\"","https://techcrunch.com/2020/09/24/twitter-read-before-retweet/"]]}
+];
+
+var EDGES = [
+  ["selective-exposure","confirmation-bias",1],
+  ["selective-exposure","echo-chambers",1],
+  ["moral-contagion","algorithmic-negativity-bias",1],
+  ["algorithmic-negativity-bias","negativity-bias",1],
+  ["operant-conditioning-variable-rewards","variable-ratio-reinforcement",1],
+  ["monologue-persuasion","monologic-dialogic",1],
+  ["emotional-narrative-manipulation","narrative-persuasion",1],
+  ["emotional-narrative-manipulation","moral-contagion",1],
+  ["filter-bubble","echo-chambers",1],
+  ["astroturfing","synthetic-consensus",1],
+  ["astroturfing","bots-troll-farms",1],
+  ["information-disorder","information-chaos",1],
+  ["firehose-of-falsehood","information-chaos",1],
+  ["gish-gallop","firehose-of-falsehood",1],
+  ["flak","attribution-ambiguity",1],
+  ["flak","manufacturing-consent",1],
+  ["brainwashing","cognitive-warfare",1],
+  ["brainwashing","reflexive-control",1],
+  ["brainwashing","continued-influence-effect",1],
+  ["brainwashing","debunking-handbook",1],
+  ["prebunking","inoculation-theory",1],
+  ["debunking-handbook","continued-influence-effect",1],
+  ["algorithmic-friction","variable-ratio-reinforcement",1],
+  ["algorithmic-friction","operant-conditioning-variable-rewards",1],
+
+  ["illusory-truth-effect","continued-influence-effect",0],
+  ["illusory-truth-effect","firehose-of-falsehood",0],
+  ["confirmation-bias","filter-bubble",0],
+  ["confirmation-bias","cognitive-dissonance",0],
+  ["social-judgment-theory","presuasion",0],
+  ["psychographic-targeting","microtargeting",0],
+  ["microtargeting","algorithmic-micro-persuasion",0],
+  ["human-terrain","narrative-kill-chain",0],
+  ["narrative-kill-chain","cognitive-warfare",0],
+  ["bots-troll-farms","coordinated-inauthentic-behavior",0],
+  ["coordinated-inauthentic-behavior","fimi",0],
+  ["synthetic-consensus","coordinated-inauthentic-behavior",0],
+  ["attribution-ambiguity","reflexive-control",0],
+  ["attribution-ambiguity","fimi",0],
+  ["ai-driven-amplification","deepfakes-synthetic-media",0],
+  ["ai-driven-amplification","synthetic-consensus",0],
+  ["algorithmic-radicalization","algorithmic-negativity-bias",0],
+  ["algorithmic-radicalization","echo-chambers",0],
+  ["whataboutism","gish-gallop",0],
+  ["lateral-reading","confirmation-bias",0],
+  ["inoculation-theory","psychological-reactance",0],
+  ["emotional-exhaustion","information-chaos",0],
+  ["exploiting-cognitive-biases","cognitive-manipulation",0]
+];
+
+var nodeById = {};
+NODES.forEach(function(n){ nodeById[n.id] = n; n.degree = 0; });
+EDGES.forEach(function(e){ nodeById[e[0]].degree++; nodeById[e[1]].degree++; });
+
+var links = EDGES.map(function(e){ return {source:e[0], target:e[1], explicit:!!e[2]}; });
+
+var svg = d3.select("#canvas");
+var W = window.innerWidth, H = window.innerHeight;
+
+function getCatColor(cat){
+  return getComputedStyle(document.documentElement).getPropertyValue(
+    cat==="cognitive" ? "--cat-cognitive" :
+    cat==="narrative" ? "--cat-narrative" :
+    cat==="algorithmic" ? "--cat-algorithmic" :
+    cat==="infoops" ? "--cat-infoops" : "--cat-resistance"
+  ).trim();
+}
+
+var g = svg.append("g");
+
+var linkSel = g.append("g").attr("class","links")
+  .selectAll("path")
+  .data(links)
+  .join("path")
+  .attr("class", function(d){ return "link" + (d.explicit ? " explicit" : ""); });
+
+var nodeSel = g.append("g").attr("class","nodes")
+  .selectAll("g")
+  .data(NODES)
+  .join("g")
+  .attr("class","node")
+  .attr("data-id", function(d){ return d.id; })
+  .call(drag);
+
+nodeSel.append("circle")
+  .attr("r", function(d){ return 6 + Math.min(d.degree, 6) * 1.4; })
+  .attr("fill", function(d){ return getCatColor(d.cat); });
+
+nodeSel.append("text")
+  .attr("dy", function(d){ return -(9 + Math.min(d.degree,6)*1.4); })
+  .attr("text-anchor","middle")
+  .text(function(d){ return d.term.length > 26 ? d.term.slice(0,24)+"…" : d.term; });
+
+nodeSel.on("click", function(event, d){
+  event.stopPropagation();
+  openPanel(d);
+  focusNode(d);
+});
+
+var simulation = d3.forceSimulation(NODES)
+  .force("link", d3.forceLink(links).id(function(d){ return d.id; }).distance(70).strength(0.35))
+  .force("charge", d3.forceManyBody().strength(-160))
+  .force("center", d3.forceCenter(0,0))
+  .force("collide", d3.forceCollide().radius(function(d){ return 16 + Math.min(d.degree,6)*1.4; }))
+  .on("tick", ticked);
+
+function ticked(){
+  linkSel.attr("d", function(d){
+    return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y;
+  });
+  nodeSel.attr("transform", function(d){ return "translate(" + d.x + "," + d.y + ")"; });
+}
+
+function drag(sel){
+  sel.call(d3.drag()
+    .on("start", function(event, d){
+      if(!event.active) simulation.alphaTarget(0.25).restart();
+      d.fx = d.x; d.fy = d.y;
+    })
+    .on("drag", function(event, d){
+      d.fx = event.x; d.fy = event.y;
+    })
+    .on("end", function(event, d){
+      if(!event.active) simulation.alphaTarget(0);
+      d.fx = null; d.fy = null;
+    }));
+}
+
+var zoom = d3.zoom().scaleExtent([0.25, 4]).on("zoom", function(event){
+  g.attr("transform", event.transform);
+});
+svg.call(zoom);
+
+function resize(){
+  W = document.querySelector(".stage").clientWidth;
+  H = document.querySelector(".stage").clientHeight;
+  svg.attr("viewBox", [-W/2, -H/2, W, H]);
+  simulation.force("center", d3.forceCenter(0,0));
+}
+window.addEventListener("resize", resize);
+resize();
+
+svg.call(zoom.transform, d3.zoomIdentity);
+
+document.getElementById("zoomIn").addEventListener("click", function(){ svg.transition().duration(200).call(zoom.scaleBy, 1.3); });
+document.getElementById("zoomOut").addEventListener("click", function(){ svg.transition().duration(200).call(zoom.scaleBy, 1/1.3); });
+document.getElementById("zoomReset").addEventListener("click", function(){ svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity); });
+
+svg.on("click", function(){ closePanel(); clearFocus(); });
+
+// ---- legend ----
+var legend = document.getElementById("legend");
+var activeCats = {};
+Object.keys(CATS).forEach(function(k){ activeCats[k] = true; });
+Object.keys(CATS).forEach(function(k){
+  var sw = document.createElement("span");
+  sw.className = "sw";
+  sw.dataset.cat = k;
+  var dot = document.createElement("span");
+  dot.className = "dot";
+  dot.style.background = "var(" + (k==="cognitive"?"--cat-cognitive":k==="narrative"?"--cat-narrative":k==="algorithmic"?"--cat-algorithmic":k==="infoops"?"--cat-infoops":"--cat-resistance") + ")";
+  sw.appendChild(dot);
+  sw.appendChild(document.createTextNode(CATS[k].label));
+  sw.addEventListener("click", function(){
+    activeCats[k] = !activeCats[k];
+    sw.classList.toggle("off", !activeCats[k]);
+    applyFilter();
+  });
+  legend.appendChild(sw);
+});
+
+// ---- search / filter ----
+var searchInput = document.getElementById("search");
+searchInput.addEventListener("input", applyFilter);
+
+function applyFilter(){
+  var q = searchInput.value.trim().toLowerCase();
+  nodeSel.classed("hidden", function(d){
+    if(!activeCats[d.cat]) return true;
+    if(!q) return false;
+    return !(d.term.toLowerCase().indexOf(q) !== -1 || (d.tag||"").toLowerCase().indexOf(q) !== -1 || d.def.toLowerCase().indexOf(q) !== -1);
+  });
+  linkSel.classed("hidden", function(d){
+    var s = nodeById[d.source.id || d.source];
+    var t = nodeById[d.target.id || d.target];
+    return !activeCats[s.cat] || !activeCats[t.cat];
+  });
+}
+
+// ---- focus / highlight on hover ----
+// Built from EDGES (plain id strings), not `links` — by this point d3.forceLink
+// has already mutated link.source/target from id strings into node object
+// references, so indexing neighborMap by l.source/l.target here would look up
+// "[object Object]" instead of the id and throw on .add().
+var neighborMap = {};
+NODES.forEach(function(n){ neighborMap[n.id] = new Set(); });
+EDGES.forEach(function(e){
+  neighborMap[e[0]].add(e[1]);
+  neighborMap[e[1]].add(e[0]);
+});
+
+nodeSel.on("mouseenter", function(event, d){
+  if(document.getElementById("panel").classList.contains("open")) return;
+  highlight(d);
+});
+nodeSel.on("mouseleave", function(){
+  if(document.getElementById("panel").classList.contains("open")) return;
+  clearFocus();
+});
+
+function highlight(d){
+  var nbrs = neighborMap[d.id];
+  nodeSel.classed("dim", function(n){ return n.id !== d.id && !nbrs.has(n.id); });
+  linkSel.classed("dim", function(l){
+    var sid = l.source.id || l.source, tid = l.target.id || l.target;
+    return sid !== d.id && tid !== d.id;
+  });
+}
+function focusNode(d){ highlight(d); }
+function clearFocus(){
+  nodeSel.classed("dim", false);
+  linkSel.classed("dim", false);
+}
+
+// ---- panel ----
+var panel = document.getElementById("panel");
+function openPanel(d){
+  document.getElementById("panelCat").textContent = CATS[d.cat].label;
+  document.getElementById("panelCat").style.background = getCatColor(d.cat);
+  document.getElementById("panelTerm").textContent = d.term;
+  document.getElementById("panelSub").textContent = d.tag;
+  document.getElementById("panelDef").textContent = d.def;
+  document.getElementById("panelExampleText").textContent = " " + d.ex;
+  var refsEl = document.getElementById("panelRefs");
+  refsEl.innerHTML = "";
+  d.refs.forEach(function(r){
+    var li = document.createElement("li");
+    var a = document.createElement("a");
+    a.href = r[1]; a.target = "_blank"; a.rel = "noopener";
+    a.textContent = r[0];
+    li.appendChild(a);
+    refsEl.appendChild(li);
+  });
+  var relEl = document.getElementById("panelRelated");
+  relEl.innerHTML = "";
+  Array.from(neighborMap[d.id]).forEach(function(nid){
+    var n = nodeById[nid];
+    var chip = document.createElement("span");
+    chip.className = "related-chip";
+    chip.textContent = n.term;
+    chip.addEventListener("click", function(e){
+      e.stopPropagation();
+      openPanel(n);
+      focusNode(n);
+    });
+    relEl.appendChild(chip);
+  });
+  document.getElementById("panelFull").href = GLOSSARY_URL + "#" + d.id;
+  panel.classList.add("open");
+}
+function closePanel(){ panel.classList.remove("open"); }
+document.getElementById("panelClose").addEventListener("click", function(e){ e.stopPropagation(); closePanel(); clearFocus(); });
+panel.addEventListener("click", function(e){ e.stopPropagation(); });
+
+}
+})();
+</script>

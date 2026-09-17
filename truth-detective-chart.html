@@ -1,0 +1,335 @@
+<title>Truth Detective Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#fdf8ec;
+    --paper-raised:#ffffff;
+    --ink:#26302e;
+    --ink-soft:#4d5a56;
+    --muted:#7c8783;
+    --line:#e3dcc8;
+
+    --teal:#1f7a6c;
+    --teal-soft:#1f7a6c1a;
+    --coral:#d1592f;
+    --coral-soft:#d1592f1a;
+    --purple:#6b4e9e;
+    --purple-soft:#6b4e9e1a;
+    --sun:#e8a83c;
+    --sun-ink:#4a3200;
+
+    --font-head:'Baloo 2', ui-rounded, 'Segoe UI', sans-serif;
+    --font-body:'Nunito', ui-sans-serif, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#1b1f1d;
+      --paper-raised:#242a27;
+      --ink:#f1ece0;
+      --ink-soft:#cbd0c9;
+      --muted:#93998f;
+      --line:#3a3f3a;
+
+      --teal:#4fbfa8;
+      --teal-soft:#4fbfa826;
+      --coral:#ef8a5e;
+      --coral-soft:#ef8a5e26;
+      --purple:#b39ce0;
+      --purple-soft:#b39ce026;
+      --sun:#f0c266;
+      --sun-ink:#2a2000;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#1b1f1d;
+    --paper-raised:#242a27;
+    --ink:#f1ece0;
+    --ink-soft:#cbd0c9;
+    --muted:#93998f;
+    --line:#3a3f3a;
+
+    --teal:#4fbfa8;
+    --teal-soft:#4fbfa826;
+    --coral:#ef8a5e;
+    --coral-soft:#ef8a5e26;
+    --purple:#b39ce0;
+    --purple-soft:#b39ce026;
+    --sun:#f0c266;
+    --sun-ink:#2a2000;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-body);
+    padding-inline:16px;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding-block:32px 56px;}
+
+  header{
+    text-align:center;
+    margin-bottom:8px;
+  }
+  .badge-row{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    font-size:34px;
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:var(--font-head);
+    font-size:clamp(30px, 6vw, 46px);
+    margin:0 0 8px;
+    color:var(--teal);
+    text-wrap:balance;
+    letter-spacing:-.01em;
+  }
+  .sub{
+    font-size:17px;
+    color:var(--ink-soft);
+    max-width:52ch;
+    margin:0 auto 6px;
+    font-weight:700;
+  }
+  .grade-tag{
+    display:inline-block;
+    font-family:var(--font-head);
+    font-weight:600;
+    font-size:13px;
+    color:var(--sun-ink);
+    background:var(--sun);
+    padding:5px 14px;
+    border-radius:20px;
+    margin-top:10px;
+  }
+
+  .cols{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:18px;
+    margin-top:32px;
+  }
+  @media (max-width:760px){
+    .cols{grid-template-columns:1fr;}
+  }
+
+  .card{
+    background:var(--paper-raised);
+    border:2px solid var(--line);
+    border-radius:20px;
+    padding:20px 18px 22px;
+    display:flex;
+    flex-direction:column;
+  }
+  .card .icon{
+    font-size:36px;
+    line-height:1;
+    margin-bottom:8px;
+  }
+  .card h2{
+    font-family:var(--font-head);
+    font-size:21px;
+    margin:0 0 4px;
+    letter-spacing:-.01em;
+  }
+  .card .lead{
+    font-size:14px;
+    color:var(--muted);
+    margin:0 0 14px;
+    font-weight:700;
+  }
+  .card.teal h2{color:var(--teal);}
+  .card.coral h2{color:var(--coral);}
+  .card.purple h2{color:var(--purple);}
+
+  .tips{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px;}
+  .tips li{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    border-radius:12px;
+    padding:10px 12px;
+    font-size:15px;
+    line-height:1.4;
+  }
+  .card.teal .tips li{background:var(--teal-soft);}
+  .card.coral .tips li{background:var(--coral-soft);}
+  .card.purple .tips li{background:var(--purple-soft);}
+  .tips .mark{
+    font-family:var(--font-head);
+    font-weight:800;
+    font-size:15px;
+    flex:none;
+    width:22px; height:22px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+  }
+  .card.teal .mark{background:var(--teal);}
+  .card.coral .mark{background:var(--coral);}
+  .card.purple .mark{background:var(--purple);}
+  .tips b{display:block; color:var(--ink); font-size:15px;}
+  .tips span{color:var(--ink-soft); font-size:13.5px;}
+
+  .stop{
+    margin-top:30px;
+    background:var(--paper-raised);
+    border:3px solid var(--sun);
+    border-radius:22px;
+    padding:22px 22px 20px;
+  }
+  .stop-head{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    justify-content:center;
+    margin-bottom:16px;
+  }
+  .stop-head .icon{font-size:30px;}
+  .stop-head h2{
+    font-family:var(--font-head);
+    font-size:24px;
+    margin:0;
+    color:var(--ink);
+    text-align:center;
+  }
+  .stop-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:14px;
+  }
+  @media (max-width:640px){
+    .stop-grid{grid-template-columns:1fr 1fr;}
+  }
+  .stop-item{
+    text-align:center;
+    padding:14px 10px;
+    border-radius:14px;
+    background:var(--sun);
+    color:var(--sun-ink);
+  }
+  .stop-item .letter{
+    font-family:var(--font-head);
+    font-size:32px;
+    font-weight:800;
+    display:block;
+    line-height:1;
+    margin-bottom:6px;
+  }
+  .stop-item .word{
+    font-family:var(--font-head);
+    font-weight:700;
+    font-size:15px;
+    display:block;
+    margin-bottom:4px;
+  }
+  .stop-item p{
+    margin:0;
+    font-size:12.5px;
+    font-weight:700;
+    opacity:.9;
+  }
+
+  footer{
+    margin-top:28px;
+    text-align:center;
+    font-size:12.5px;
+    color:var(--muted);
+    font-weight:700;
+  }
+  footer .rule{
+    width:60px; height:3px;
+    background:var(--line);
+    border-radius:3px;
+    margin:0 auto 12px;
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="badge-row">🕵️‍♀️📱🛡️</div>
+    <h1>Truth Detective Guide</h1>
+    <p class="sub">Be smart online! Learn to spot fake news, block sneaky tricks, and take care of your mind.</p>
+    <span class="grade-tag">Easy-Read Chart · Grades 4+</span>
+  </header>
+
+  <div class="cols">
+    <div class="card teal">
+      <div class="icon">🔍</div>
+      <h2>Spot Fake News</h2>
+      <p class="lead">Some stories are made up. Here is how to check.</p>
+      <ul class="tips">
+        <li><span class="mark">1</span><div><b>Check the source.</b><span>Who posted this? Is it a real news group, or just a random account?</span></div></li>
+        <li><span class="mark">2</span><div><b>Look for other reports.</b><span>Do other trusted places say the same thing?</span></div></li>
+        <li><span class="mark">3</span><div><b>Check the date.</b><span>Old news can trick you. Make sure the story is new.</span></div></li>
+        <li><span class="mark">4</span><div><b>Notice big feelings.</b><span>If a post makes you mad or scared right away, stop and think first.</span></div></li>
+        <li><span class="mark">5</span><div><b>Check the picture.</b><span>Photos can be changed. Ask an adult to help you look closer.</span></div></li>
+      </ul>
+    </div>
+
+    <div class="card coral">
+      <div class="icon">🛑</div>
+      <h2>Block Sneaky Tricks</h2>
+      <p class="lead">Ads and posts can try to trick you. Watch for these tricks.</p>
+      <ul class="tips">
+        <li><span class="mark">1</span><div><b>Ask what they want.</b><span>Ads and posts often want your money, your click, or your vote.</span></div></li>
+        <li><span class="mark">2</span><div><b>Watch for name-calling.</b><span>If someone attacks a person instead of explaining ideas, be careful.</span></div></li>
+        <li><span class="mark">3</span><div><b>Slow down before you share.</b><span>Wait one minute. Do not share right away.</span></div></li>
+        <li><span class="mark">4</span><div><b>Spot trick words.</b><span>"Everyone knows this" or "they don't want you to see this" are warning signs.</span></div></li>
+        <li><span class="mark">5</span><div><b>Look at both sides.</b><span>Good information shows more than one side of a story.</span></div></li>
+      </ul>
+    </div>
+
+    <div class="card purple">
+      <div class="icon">💜</div>
+      <h2>Take Care of Your Mind</h2>
+      <p class="lead">Apps are built to keep you scrolling. Protect yourself.</p>
+      <ul class="tips">
+        <li><span class="mark">1</span><div><b>Take breaks.</b><span>Put the phone down. Rest your eyes and your brain.</span></div></li>
+        <li><span class="mark">2</span><div><b>Don't chase likes.</b><span>Likes do not measure how good or important you are.</span></div></li>
+        <li><span class="mark">3</span><div><b>Notice your feelings.</b><span>If an app makes you feel sad or jealous, take a break from it.</span></div></li>
+        <li><span class="mark">4</span><div><b>Turn off some alerts.</b><span>Buzzes and pings pull you back in. Turn some off.</span></div></li>
+        <li><span class="mark">5</span><div><b>Talk to a trusted adult.</b><span>If something online feels wrong or scary, tell a parent, teacher, or trusted adult.</span></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="stop">
+    <div class="stop-head">
+      <span class="icon">🧭</span>
+      <h2>The S.T.O.P. Test — Use it before you believe or share anything</h2>
+    </div>
+    <div class="stop-grid">
+      <div class="stop-item">
+        <span class="letter">S</span>
+        <span class="word">Source</span>
+        <p>Who made this?</p>
+      </div>
+      <div class="stop-item">
+        <span class="letter">T</span>
+        <span class="word">True?</span>
+        <p>Can I check it somewhere else?</p>
+      </div>
+      <div class="stop-item">
+        <span class="letter">O</span>
+        <span class="word">Others</span>
+        <p>What do other people say?</p>
+      </div>
+      <div class="stop-item">
+        <span class="letter">P</span>
+        <span class="word">Pause</span>
+        <p>Wait before you share.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="rule"></div>
+    Companion to the Persuasion Dossier project · written at an easy 4th-grade reading level
+  </footer>
+</div>

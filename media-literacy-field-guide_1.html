@@ -1,0 +1,233 @@
+<title>Media Literacy Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f3efe4;
+    --paper-raised:#ece5d3;
+    --ink:#211d17;
+    --ink-soft:#4a4438;
+    --muted:#7a7264;
+    --line:#d9d0ba;
+
+    --cognitive:#9a7b2f;
+    --cognitive-soft:#9a7b2f1a;
+    --propaganda:#8a2f24;
+    --propaganda-soft:#8a2f2418;
+    --platform:#35618c;
+    --platform-soft:#35618c1a;
+    --sift:#2f6b5e;
+    --sift-soft:#2f6b5e14;
+
+    --font-head:'Space Grotesk', 'Segoe UI', sans-serif;
+    --font-serif:'Source Serif 4', Georgia, serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#18160f; --paper-raised:#211e15; --ink:#eae3d2; --ink-soft:#c9c0ac;
+      --muted:#948a76; --line:#3a3527;
+      --cognitive:#d8b859; --cognitive-soft:#d8b8592a;
+      --propaganda:#e08a70; --propaganda-soft:#e08a7024;
+      --platform:#7aa8db; --platform-soft:#7aa8db24;
+      --sift:#5fae9c; --sift-soft:#5fae9c1e;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#18160f; --paper-raised:#211e15; --ink:#eae3d2; --ink-soft:#c9c0ac;
+    --muted:#948a76; --line:#3a3527;
+    --cognitive:#d8b859; --cognitive-soft:#d8b8592a;
+    --propaganda:#e08a70; --propaganda-soft:#e08a7024;
+    --platform:#7aa8db; --platform-soft:#7aa8db24;
+    --sift:#5fae9c; --sift-soft:#5fae9c1e;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-serif);
+    padding-inline:16px;
+  }
+  .wrap{max-width:960px; margin:0 auto; padding-block:36px 60px;}
+
+  header{border-bottom:2px solid var(--ink); padding-bottom:22px; margin-bottom:30px;}
+  .eyebrow{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--propaganda); margin:0 0 10px;
+  }
+  h1{
+    font-family:var(--font-head);
+    font-size:clamp(28px, 5vw, 42px);
+    margin:0 0 10px;
+    font-weight:700;
+    letter-spacing:-.01em;
+    text-wrap:balance;
+  }
+  .dek{ font-size:16.5px; color:var(--ink-soft); max-width:64ch; margin:0 0 14px; }
+  .meta-row{
+    display:flex; flex-wrap:wrap; gap:8px 18px;
+    font-family:var(--font-mono); font-size:11.5px; color:var(--muted);
+  }
+
+  .cols{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+    margin-bottom:34px;
+  }
+  @media (max-width:800px){ .cols{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px 20px 22px;
+  }
+  .card-head{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .card-head .icon{ font-size:22px; }
+  .card h2{
+    font-family:var(--font-head);
+    font-size:19px;
+    margin:0;
+    letter-spacing:-.01em;
+  }
+  .card.cognitive h2{color:var(--cognitive);}
+  .card.propaganda h2{color:var(--propaganda);}
+  .card.platform h2{color:var(--platform);}
+  .card .lead{ font-size:13.5px; color:var(--muted); margin:0 0 16px; font-style:italic; }
+
+  .tips{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:13px; }
+  .tips li{ border-radius:10px; padding:10px 12px; font-size:14.5px; line-height:1.5; }
+  .card.cognitive .tips li{background:var(--cognitive-soft);}
+  .card.propaganda .tips li{background:var(--propaganda-soft);}
+  .card.platform .tips li{background:var(--platform-soft);}
+  .tips .term{
+    display:block; font-family:var(--font-head); font-weight:600;
+    font-size:14.5px; color:var(--ink); margin-bottom:2px;
+  }
+  .tips .body{ color:var(--ink-soft); }
+  .tips .tag{
+    font-family:var(--font-mono); font-size:9.5px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--muted);
+    display:inline-block; margin-left:6px;
+  }
+
+  .sift{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-left:5px solid var(--sift);
+    border-radius:0 14px 14px 0;
+    padding:24px 24px 26px;
+  }
+  .sift-head{ display:flex; align-items:baseline; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+  .sift-head h2{
+    font-family:var(--font-head); font-size:21px; margin:0; color:var(--sift);
+  }
+  .sift-head .credit{
+    font-family:var(--font-mono); font-size:11px; color:var(--muted);
+  }
+  .sift-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:14px;
+  }
+  @media (max-width:700px){ .sift-grid{grid-template-columns:1fr 1fr;} }
+  .sift-item{ background:var(--sift-soft); border-radius:10px; padding:14px 14px 15px; }
+  .sift-item .letter{
+    font-family:var(--font-head); font-weight:700; font-size:26px;
+    color:var(--sift); display:block; margin-bottom:4px;
+  }
+  .sift-item .word{ font-family:var(--font-head); font-weight:600; font-size:14.5px; display:block; margin-bottom:5px; }
+  .sift-item p{ margin:0; font-size:13px; color:var(--ink-soft); line-height:1.4; }
+
+  footer{
+    margin-top:32px; padding-top:16px; border-top:1px solid var(--line);
+    font-family:var(--font-mono); font-size:11px; color:var(--muted);
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Media Literacy / Persuasion Dossier Companion</p>
+    <h1>Media Literacy Field Guide</h1>
+    <p class="dek">How to spot disinformation, resist propaganda techniques, and outsmart the social media platforms designed to hold your attention.</p>
+    <div class="meta-row">
+      <span>READING LEVEL: GRADES 7–8</span>
+      <span>15 SKILLS · 1 METHOD</span>
+    </div>
+  </header>
+
+  <div class="cols">
+    <div class="card cognitive">
+      <div class="card-head"><span class="icon">🔎</span><h2>Spot Disinformation</h2></div>
+      <p class="lead">False or misleading information spreads fast. Here's how to catch it.</p>
+      <ul class="tips">
+        <li><span class="term">Check the source's credibility<span class="tag">verify</span></span><span class="body">Look up who created the content and what their track record is before you trust it.</span></li>
+        <li><span class="term">Watch the illusory truth effect<span class="tag">cognitive bias</span></span><span class="body">Repeated claims start to feel true just because you've seen them many times, even when they're false.</span></li>
+        <li><span class="term">Read laterally<span class="tag">technique</span></span><span class="body">Open a new tab and check what other reliable sources say, instead of judging a site by itself.</span></li>
+        <li><span class="term">Notice emotional triggers<span class="tag">warning sign</span></span><span class="body">Content built to make you angry, afraid, or thrilled right away is often trying to bypass careful thinking.</span></li>
+        <li><span class="term">Verify images and video<span class="tag">verify</span></span><span class="body">Deepfakes and edited media can show events that never happened. A reverse image search can help you check.</span></li>
+      </ul>
+    </div>
+
+    <div class="card propaganda">
+      <div class="card-head"><span class="icon">🎯</span><h2>Block Propaganda Techniques</h2></div>
+      <p class="lead">Propaganda uses predictable tricks. Learn to name them.</p>
+      <ul class="tips">
+        <li><span class="term">Recognize loaded language<span class="tag">technique</span></span><span class="body">Propaganda often uses emotional words instead of neutral facts to steer your opinion.</span></li>
+        <li><span class="term">Spot false choices<span class="tag">technique</span></span><span class="body">Watch for messages that force you to pick between only two extreme options when more actually exist.</span></li>
+        <li><span class="term">Identify whataboutism<span class="tag">rhetoric</span></span><span class="body">Deflecting criticism by pointing at an unrelated problem is a rhetorical trick, not a real argument.</span></li>
+        <li><span class="term">Question manufactured consensus<span class="tag">info-ops</span></span><span class="body">Coordinated accounts or bots can make a fringe opinion look popular. Check whether real people actually hold it.</span></li>
+        <li><span class="term">Separate opinion from evidence<span class="tag">technique</span></span><span class="body">Ask what specific evidence backs a claim, not just how confidently it's stated.</span></li>
+      </ul>
+    </div>
+
+    <div class="card platform">
+      <div class="card-head"><span class="icon">📲</span><h2>Outsmart Platform Traps</h2></div>
+      <p class="lead">Apps are engineered to keep you scrolling. Know the mechanics.</p>
+      <ul class="tips">
+        <li><span class="term">Understand variable rewards<span class="tag">mechanism</span></span><span class="body">Apps work like slot machines: unpredictable likes and notifications keep you checking compulsively.</span></li>
+        <li><span class="term">Notice algorithmic amplification<span class="tag">mechanism</span></span><span class="body">Platforms often promote content that provokes a strong reaction, not necessarily content that's accurate.</span></li>
+        <li><span class="term">Watch for echo chambers<span class="tag">social mechanism</span></span><span class="body">If everyone in your feed agrees with you, you're seeing a narrow slice of opinion, not the whole picture.</span></li>
+        <li><span class="term">Set boundaries on your time<span class="tag">habit</span></span><span class="body">Turn off notifications you don't need, and check apps at set times instead of reacting to every alert.</span></li>
+        <li><span class="term">Audit how content makes you feel<span class="tag">habit</span></span><span class="body">Ask whether an app usually leaves you informed and calm, or anxious and envious.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sift">
+    <div class="sift-head">
+      <h2>The SIFT Method</h2>
+      <span class="credit">— developed by Mike Caulfield, media literacy researcher</span>
+    </div>
+    <div class="sift-grid">
+      <div class="sift-item">
+        <span class="letter">S</span>
+        <span class="word">Stop</span>
+        <p>Pause before you react to or share anything.</p>
+      </div>
+      <div class="sift-item">
+        <span class="letter">I</span>
+        <span class="word">Investigate the source</span>
+        <p>Take a minute to learn where the information comes from.</p>
+      </div>
+      <div class="sift-item">
+        <span class="letter">F</span>
+        <span class="word">Find better coverage</span>
+        <p>Look for other, more reliable sources on the same claim.</p>
+      </div>
+      <div class="sift-item">
+        <span class="letter">T</span>
+        <span class="word">Trace claims to the original</span>
+        <p>Follow a quote, claim, or clip back to its original context.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Companion to the Persuasion Dossier project · junior-high edition (grades 7–8) · a simpler grades-4+ version is also available
+  </footer>
+</div>
